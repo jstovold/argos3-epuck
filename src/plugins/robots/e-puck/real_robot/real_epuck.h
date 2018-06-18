@@ -45,6 +45,8 @@ namespace argos {
 #include <signal.h>
 #include <unistd.h>
 
+//#include <argos3/plugins/robots/e-puck/real_robot/real_epuck_i2c_device.h>
+
 namespace argos {
 
    /****************************************/
@@ -67,7 +69,7 @@ namespace argos {
    /****************************************/
    /****************************************/
 
-   class CRealEPuck {
+   class CRealEPuck : public CRealEPuckI2CDevice {
 
    protected:
 
@@ -241,6 +243,11 @@ namespace argos {
 
    private:
 
+//      const std::string I2C_DEVICE = "/dev/i2c-3";
+
+      void InitI2C();
+
+
       /**
        * Initialize the serial port
        */
@@ -340,6 +347,8 @@ namespace argos {
          } while (unLeftToWrite != 0);
         }
 
+
+
       /**
        * Receive data from the pic
        *
@@ -365,6 +374,64 @@ namespace argos {
                pnCurrentPos += nRead;
             }
          } while (unLeftToRead != 0);
+      }
+
+      template<typename T> void SendDataToPic_i2c(T& t_data) {
+         /* the size of the data send to the pic */
+         //ssize_t nWritten;
+         /* the size of the data to write */
+         //size_t unLeftToWrite = sizeof(T);
+         /* current position in the data */
+         //UInt8* pnCurrentPos = (UInt8*) &t_data;
+//         do {
+//  	   LOG << "[JHS] to write: " << sizeof(T) << std::endl;
+            CRealEPuckI2CDevice::WriteData(m_ni2cPortFileDescriptor,
+		                           (SInt8*)&t_data,
+                   			   sizeof(T) - 1);
+
+            //if (nWritten < 0) {
+            //   THROW_ARGOSEXCEPTION("Error writing data to the i2c");
+            //} else {
+            //   unLeftToWrite -= nWritten;
+            //   pnCurrentPos += nWritten;
+            //}
+         //} while (unLeftToWrite != 0);
+        }
+
+      /**
+       * Receive data from the pic
+       *
+       * @param t_data the variable where to store the data received
+       */
+      template<typename T> void ReceiveDataFromPic_i2c(T& t_data) {
+	ReceiveDataFromPic_i2c<T>(t_data, sizeof(T));
+      }
+
+
+      template<typename T> void ReceiveDataFromPic_i2c(T& t_data, int overrideReadLength) {
+        /* the size of the data read on the pic */
+         ssize_t nRead;
+         /* the size of the data left to read */
+         size_t unLeftToRead = overrideReadLength;
+         /* current position in the data */
+//	 LOG << "[JHS] to read: " << unLeftToRead << std::endl;
+
+         UInt8* pnCurrentPos = (UInt8*) &t_data;
+         do {
+            /* try to read the content of data to the pic */
+            nRead = ::read(m_ni2cPortFileDescriptor,
+                           pnCurrentPos,
+                           unLeftToRead);
+            /* if there was an error during reading */
+            if (nRead < 0) {
+               THROW_ARGOSEXCEPTION("Error reading data from the pic");
+            } else {
+               unLeftToRead -= nRead;
+               pnCurrentPos += nRead;
+            }
+  //	    LOG << "[JHS] read from i2c: " << nRead << std::endl;
+         } while (unLeftToRead != 0);
+
       }
 
       /**
@@ -434,6 +501,9 @@ namespace argos {
        * Descriptor of serial port. Initialized to -1.
        */
       SInt32 m_nPortFileDescriptor;
+
+      TI2CDeviceStream m_ni2cPortFileDescriptor;
+
 
       /**
        * List of sensors that communicate to the PIC30 through serial communication.

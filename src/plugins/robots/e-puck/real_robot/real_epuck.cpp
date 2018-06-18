@@ -24,6 +24,7 @@ namespace argos {
 
 const std::string DEVICE = "/dev/ttyS0";
 const speed_t BAUD_RATE = B115200;
+const SInt16 I2C_DEVICE = 0x1F;
 
 /****************************************/
 /****************************************/
@@ -53,6 +54,7 @@ CRealEPuck::CRealEPuck() :
     m_unTimeBeforeControlStep(0),
     m_unTimeAfterControlStep(0),
     m_nPortFileDescriptor(-1),
+    m_ni2cPortFileDescriptor(-1),
     m_cRandomRange(0, 10000),
     m_eBoardState(WAITING)
 {
@@ -81,7 +83,7 @@ CRealEPuck::~CRealEPuck() {
     case WAKE_UP:
     {
         LOGERR << "[WARNING] Interruption while waking up, " << m_eBoardState << std::endl;
-        SendSensorConfiguration();
+//        SendSensorConfiguration();
         ReceiveSensorData();
         break;
     }
@@ -116,13 +118,46 @@ CRealEPuck::~CRealEPuck() {
 
 void CRealEPuck::Init(const std::string& str_config_file_name,
                       const std::string& str_controller_id) {
+
     RegisterSystemSignalHandlers();
     InitSerial();
     CRealEPuckI2CDevice::Init();
+
+    InitI2C();
+
     WakeUpPic();
     SendSensorConfiguration();
     InitController(str_config_file_name, str_controller_id);
 }
+
+
+void CRealEPuck::InitI2C() {
+    switch (m_eBoardState){
+    case SENDING_CONFIGURATION:
+    case WAITING:
+    case SEND:
+    case WAKE_UP:
+    case RECEIVE:
+    {
+        LOGERR << "[WARNING] Out-of-sync operation: InitI2C(), " << m_eBoardState << std::endl;
+        break;
+    }
+    case INITIALIZATION:
+    {
+//        m_eBoardState = INITIALIZATION;
+	m_ni2cPortFileDescriptor = OpenDevice(I2C_DEVICE);
+        if (m_ni2cPortFileDescriptor < 0) {
+	  LOGERR << "[ERROR] could not open i2c device " << std::endl;
+   	}
+//        SendDataToPic<BaseSensorConfiguration>(m_sSensorConfiguration);
+        break;
+    }
+    }
+
+
+}
+
+
 
 /****************************************/
 /****************************************/
@@ -141,7 +176,7 @@ void CRealEPuck::SendSensorConfiguration() {
     case WAKE_UP:
     {
         m_eBoardState = SENDING_CONFIGURATION;
-        SendDataToPic<BaseSensorConfiguration>(m_sSensorConfiguration);
+//        SendDataToPic<BaseSensorConfiguration>(m_sSensorConfiguration);
         break;
     }
     }
@@ -152,7 +187,7 @@ void CRealEPuck::SendSensorConfiguration() {
 
 void CRealEPuck::SendActuatorData() {
     switch (m_eBoardState) {
-    case SENDING_CONFIGURATION:
+//    case SENDING_CONFIGURATION:
     case WAITING:
     case INITIALIZATION:
     case WAKE_UP:
@@ -161,6 +196,7 @@ void CRealEPuck::SendActuatorData() {
         LOGERR << "[WARNING] Out-of-sync operation: SendActuatorData(), " << m_eBoardState << std::endl;
         break;
     }
+    case SENDING_CONFIGURATION:
     case RECEIVE:
     {
         /* Send data to the I2C bus */
@@ -168,7 +204,17 @@ void CRealEPuck::SendActuatorData() {
             m_vecI2CActuators[i]->SendData();
         }
         /* Send data to the serial bus */
-        SendDataToPic<BaseActuatorState>(m_sActuatorState);
+
+	I2CActuatorState convertedActuatorState; 
+	CRealEPuckI2CDevice::convertActuatorState(&m_sActuatorState, &convertedActuatorState);
+	//UInt8 unpackedState[19] = {};
+//	CRealEPuckI2CDevice::unpackStruct_actuator(&convertedActuatorState, unpackedState);
+
+//	LOG << "[JHS] " << convertedActuatorState << std::endl;
+
+        SendDataToPic_i2c<I2CActuatorState>(convertedActuatorState);
+        //SendDataToPic_i2c(unpackedState, 19);
+
         /* Set new state */
         m_eBoardState = SEND;
         break;
@@ -189,20 +235,34 @@ void CRealEPuck::ReceiveSensorData() {
     case WAITING:
     case INITIALIZATION:
     case WAKE_UP:
+    case SENDING_CONFIGURATION:
     case RECEIVE:
     {
         LOGERR << "[WARNING] Out-of-sync operation: ReceiveSensorData(), "  << m_eBoardState << std::endl;
         break;
     }
-    case SENDING_CONFIGURATION:
     case SEND:
     {
+// 	LOG << "[JHS-2] entering receiveSensorData " << std::endl;
         /* Receive data from the I2C bus */
         for(size_t i = 0; i < m_vecI2CSensors.size(); ++i) {
             m_vecI2CSensors[i]->ReceiveData();
+//	    LOG << "[JHS-2] i2c sensor data received " << std::endl;
+
         }
         /* Receive data from the serial bus */
-        ReceiveDataFromPic<BaseSensorState>(m_sSensorState);
+ //	LOG << "[JHS-2] waiting on serial data " << std::endl;
+
+        I2CSensorState receivedData;
+
+        ReceiveDataFromPic_i2c<I2CSensorState>(receivedData, 30);
+ //	LOG << "[JHS-2] data received: " << sizeof(receivedData) << std::endl;
+   //     LOG << "[JHS] : \t" << receivedData << std::endl;
+
+
+	CRealEPuckI2CDevice::convertSensorState(&receivedData, &m_sSensorState);
+ //	LOG << "[JHS-2] data converted " << std::endl;
+
         m_eBoardState = RECEIVE;
         break;
     }
@@ -239,8 +299,10 @@ CCI_Actuator* CRealEPuck::InsertActuator(const std::string& str_actuator_name) {
         pcLEDsActuator->SetState(m_sActuatorState);
         return pcLEDsActuator;
     } else if (str_actuator_name == "epuck_rgb_leds") {
-        CRealEPuckRGBLEDsActuator* pcRGBLEDsActuator = CreateActuator<CRealEPuckRGBLEDsActuator>(str_actuator_name);
-        m_vecI2CActuators.push_back(pcRGBLEDsActuator);
+      
+	CRealEPuckRGBLEDsActuator* pcRGBLEDsActuator = CreateActuator<CRealEPuckRGBLEDsActuator>(str_actuator_name);
+        pcRGBLEDsActuator->SetState(m_sActuatorState);
+	//m_vecI2CActuators.push_back(pcRGBLEDsActuator);
         return pcRGBLEDsActuator;
     } else if (str_actuator_name == "epuck_range_and_bearing") {
         CRealEPuckRangeAndBearingActuator* pcRABActuator = CreateActuator<CRealEPuckRangeAndBearingActuator>(str_actuator_name);
@@ -484,7 +546,7 @@ void CRealEPuck::WakeUpPic() {
     case INITIALIZATION:
     {
         m_eBoardState = WAKE_UP;
-        SendDataToPic<UInt8>(WAKE_UP_PIC_SYMBOL);
+//        SendDataToPic<UInt8>(WAKE_UP_PIC_SYMBOL);
         break;
     }
     }

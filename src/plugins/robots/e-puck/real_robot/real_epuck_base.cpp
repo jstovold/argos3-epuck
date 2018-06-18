@@ -79,6 +79,34 @@ namespace argos {
         return t_os;
     }
 
+    std::ostream& operator<<(std::ostream& t_os,
+                             const I2CSensorState& s_state) {
+        t_os << "[ prox={"
+             << s_state.Proximity[0] << " "
+             << s_state.Proximity[1] << " "
+             << s_state.Proximity[2] << " "
+             << s_state.Proximity[3] << " "
+             << s_state.Proximity[4] << " "
+             << s_state.Proximity[5] << " "
+             << s_state.Proximity[6] << " "
+             << s_state.Proximity[7]
+             << "}, micro={"
+             << s_state.Micro[0] << " "
+             << s_state.Micro[1] << " "
+             << s_state.Micro[2] << " "
+             << s_state.Micro[3]
+	     << "}, selector={"
+	     << s_state.Selector
+	     << "}, steps={L: "
+	     << s_state.StepsL << " R:"
+	     << s_state.StepsR
+	     << "}, TVRemote={"
+	     << s_state.TVRemote << "} ]";
+
+        t_os << "" << std::endl;
+        return t_os;
+    }
+
     /****************************************/
     /****************************************/
 
@@ -110,6 +138,27 @@ namespace argos {
         } else {
             t_os << "INACTIVE";
         }
+        t_os << "} ]" << std::endl;
+        return t_os;
+    }
+
+    /****************************************/
+    /****************************************/
+
+    std::ostream& operator<<(std::ostream& t_os,
+                             const I2CActuatorState& s_state) {
+        t_os << "[ lwheel=" << s_state.LWheel << ", "
+             << "rwheel=" << s_state.RWheel << ", "
+             << "ring_leds={"
+             << s_state.BaseLEDs << " "
+             << "}, LEDs=[" << " "
+	     << "LED1={" << s_state.LEDRed_1 << "," << s_state.LEDGreen_1 << "," << s_state.LEDBlue_1 << "}, "
+	     << "LED2={" << s_state.LEDRed_2 << "," << s_state.LEDGreen_2 << "," << s_state.LEDBlue_2 << "}, "
+	     << "LED3={" << s_state.LEDRed_3 << "," << s_state.LEDGreen_3 << "," << s_state.LEDBlue_3 << "}, "
+	     << "LED4={" << s_state.LEDRed_4 << "," << s_state.LEDGreen_4 << "," << s_state.LEDBlue_4 
+	     << "}, additional= { "
+	     << s_state.additional;
+
         t_os << "} ]" << std::endl;
         return t_os;
     }

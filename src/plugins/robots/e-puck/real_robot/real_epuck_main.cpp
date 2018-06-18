@@ -73,6 +73,12 @@ int main(int argc, char** argv) {
     LOG << "[INFO] ACTUATOR SIZE "
         << sizeof (BaseActuatorState)
         << std::endl;
+    LOG << "[INFO] I2C SENSOR SIZE "
+        << sizeof (I2CSensorState)
+        << std::endl;
+    LOG << "[INFO] I2C ACTUATOR SIZE "
+        << sizeof (I2CActuatorState)
+        << std::endl;
     LOG.Flush();
 
     /*
@@ -94,20 +100,31 @@ int main(int argc, char** argv) {
     /*
      * Main loop, control step execution, sync
      */
+
     try {
+	LOG << "[JHS] entering main loop " << std::endl;
         /* be sure to be sync on the ticks before begining the steps */
         pcRealEPuck->SyncControlStep();
+	LOG << "[JHS] control steps synced " << std::endl;
+           pcRealEPuck->SendActuatorData();
+
         while (!pcRealEPuck->IsExperimentFinished() && !pcRealEPuck->bGoHome()) {
+//	   LOG << "[JHS] start of loop " << std::endl;
            /* Receive raw data from robot sensors */
            pcRealEPuck->ReceiveSensorData();
+//	   LOG << "[JHS] sensor data received " << std::endl;
            /* Perform sensor data post-processing */
            pcRealEPuck->UpdateValues();
+//	   LOG << "[JHS] values updated " << std::endl;
            /* Execute control step only if we can at this time */
            pcRealEPuck->GetController().ControlStep();
+//	   LOG << "[JHS] step " << std::endl;
            /* Synchronize the current step on the ticks from xml config file */
            pcRealEPuck->SyncControlStep();
+//	   LOG << "[JHS] control steps synced " << std::endl;
            /* Send data to robot actuators */
            pcRealEPuck->SendActuatorData();
+//	   LOG << "[JHS] actuator data sent " << std::endl;
            /* Flush the logs */
            LOG.Flush();
            LOGERR.Flush();
@@ -116,6 +133,7 @@ int main(int argc, char** argv) {
         LOGERR << "[FATAL] Failed during the control steps: "
                << ex.what() << std::endl;
         LOGERR.Flush();
+        LOG.Flush();
         return EXIT_FAILURE;
     }
   /* Normal ending conditions */

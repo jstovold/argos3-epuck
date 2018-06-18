@@ -15,7 +15,6 @@ namespace argos {
 
 CRealEPuckRGBLEDsActuator::CRealEPuckRGBLEDsActuator() {
 
-    m_tDeviceStream = OpenDevice(0x61);
 
 }
 
@@ -25,31 +24,78 @@ CRealEPuckRGBLEDsActuator::CRealEPuckRGBLEDsActuator() {
 CRealEPuckRGBLEDsActuator::~CRealEPuckRGBLEDsActuator() {
 
     SetColors(CColor::BLACK);
-    SendData();
-    CloseDevice(m_tDeviceStream);
 
 }
 
-/****************************************/
-/****************************************/
+void CRealEPuckRGBLEDsActuator::SetColor(size_t un_led_number,
+					 const CColor& c_color) {
 
-void CRealEPuckRGBLEDsActuator::SendData() {
-
-    SInt8 nData[9];
-    nData[0] = m_tLEDSettings[2].GetRed();
-    nData[1] = m_tLEDSettings[2].GetGreen();
-    nData[2] = m_tLEDSettings[2].GetBlue();
-    nData[3] = m_tLEDSettings[1].GetRed();
-    nData[4] = m_tLEDSettings[1].GetGreen();
-    nData[5] = m_tLEDSettings[1].GetBlue();
-    nData[6] = m_tLEDSettings[0].GetRed();
-    nData[7] = m_tLEDSettings[0].GetGreen();
-    nData[8] = m_tLEDSettings[0].GetBlue();
-    WriteData(m_tDeviceStream, nData, 9);
+  switch (un_led_number) {
+   case 0:
+	m_psState->LEDRed_1   = c_color.GetRed();
+	m_psState->LEDGreen_1 = c_color.GetGreen();
+	m_psState->LEDBlue_1  = c_color.GetBlue();
+	break;
+   case 1:
+	m_psState->LEDRed_2   = c_color.GetRed();
+	m_psState->LEDGreen_2 = c_color.GetGreen();
+	m_psState->LEDBlue_2  = c_color.GetBlue();
+	break;
+   case 2:
+	m_psState->LEDRed_3   = c_color.GetRed();
+	m_psState->LEDGreen_3 = c_color.GetGreen();
+	m_psState->LEDBlue_3  = c_color.GetBlue();
+	break;
+   case 3:
+	m_psState->LEDRed_4   = c_color.GetRed();
+	m_psState->LEDGreen_4 = c_color.GetGreen();
+	m_psState->LEDBlue_4  = c_color.GetBlue();
+	break;
+   default:
+    break;
+  }
 
 }
 
-/****************************************/
-/****************************************/
+
+void CRealEPuckRGBLEDsActuator::SetColors(const CColor& c_color) {
+	m_psState->LEDRed_1   = c_color.GetRed();
+	m_psState->LEDGreen_1 = c_color.GetGreen();
+	m_psState->LEDBlue_1  = c_color.GetBlue();
+	m_psState->LEDRed_2   = c_color.GetRed();
+	m_psState->LEDGreen_2 = c_color.GetGreen();
+	m_psState->LEDBlue_2  = c_color.GetBlue();
+	m_psState->LEDRed_3   = c_color.GetRed();
+	m_psState->LEDGreen_3 = c_color.GetGreen();
+	m_psState->LEDBlue_3  = c_color.GetBlue();
+	m_psState->LEDRed_4   = c_color.GetRed();
+	m_psState->LEDGreen_4 = c_color.GetGreen();
+	m_psState->LEDBlue_4  = c_color.GetBlue();
+
+}
+
+void CRealEPuckRGBLEDsActuator::SetColors(const TLEDSettings& c_colors) {
+	m_psState->LEDRed_1   = c_colors[0].GetRed();
+	m_psState->LEDGreen_1 = c_colors[0].GetGreen();
+	m_psState->LEDBlue_1  = c_colors[0].GetBlue();
+
+	m_psState->LEDRed_2   = c_colors[1].GetRed();
+	m_psState->LEDGreen_2 = c_colors[1].GetGreen();
+	m_psState->LEDBlue_2  = c_colors[1].GetBlue();
+
+	m_psState->LEDRed_3   = c_colors[2].GetRed();
+	m_psState->LEDGreen_3 = c_colors[2].GetGreen();
+	m_psState->LEDBlue_3  = c_colors[2].GetBlue();
+/*
+	m_psState->LEDRed_4   = c_colors[3].GetRed();
+	m_psState->LEDGreen_4 = c_colors[3].GetGreen();
+	m_psState->LEDBlue_4  = c_colors[3].GetBlue();
+*/
+	m_psState->LEDRed_4   = c_colors[0].GetRed();
+	m_psState->LEDGreen_4 = c_colors[0].GetGreen();
+	m_psState->LEDBlue_4  = c_colors[0].GetBlue();
+
+}
+
 
 }

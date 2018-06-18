@@ -12,6 +12,7 @@ if(ARGOS_BUILD_FOR_SIMULATOR)
   target_link_libraries(rab_selective_test argos3plugin_${ARGOS_BUILD_FOR}_epuck)
 
   #add_subdirectory(NEAT.1.2.1)
+  add_subdirectory(demos)
 else()
   add_executable(console
     console.h
@@ -33,5 +34,12 @@ else()
     ../plugins/robots/e-puck/real_robot/real_epuck_main.cpp)
   target_link_libraries(calibration argos3plugin_${ARGOS_BUILD_FOR}_epuck)
 
+  add_executable(jhs
+    jhs.h
+    jhs.cpp
+    ../plugins/robots/e-puck/real_robot/real_epuck_main.cpp)
+  target_link_libraries(jhs argos3plugin_${ARGOS_BUILD_FOR}_epuck)
+
   #add_subdirectory(NEAT.1.2.1)
+  add_subdirectory(demos)
 endif(ARGOS_BUILD_FOR_SIMULATOR)

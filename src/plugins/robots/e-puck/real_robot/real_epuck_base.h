@@ -80,12 +80,90 @@ typedef struct {
     UInt8 IRComMessageData;      // 1 byte
     UInt8 Reset;                 // 1 byte
     UInt8 padding;               // PADDING 1 byte
+
+    UInt8 LEDRed_1;                // 1 byte
+    UInt8 LEDGreen_1;              // 1 byte
+    UInt8 LEDBlue_1;               // 1 byte
+    UInt8 LEDRed_2;                // 1 byte
+    UInt8 LEDGreen_2;              // 1 byte
+    UInt8 LEDBlue_2;               // 1 byte
+    UInt8 LEDRed_3;                // 1 byte
+    UInt8 LEDGreen_3;              // 1 byte
+    UInt8 LEDBlue_3;               // 1 byte
+    UInt8 LEDRed_4;                // 1 byte
+    UInt8 LEDGreen_4;              // 1 byte
+    UInt8 LEDBlue_4;                // 1 byte
+
 } BaseActuatorState;
+
+
+typedef struct {
+    SInt16 LWheel;               // 2 bytes
+    SInt16 RWheel;               // 2 bytes
+    UInt8 Speaker;               // 1 byte
+    UInt8 BaseLEDs;                // 1 byte
+    UInt8 LEDRed_1;                // 1 byte
+    UInt8 LEDGreen_1;              // 1 byte
+
+    UInt8 LEDBlue_1;               // 1 byte
+    UInt8 LEDRed_2;                // 1 byte
+    UInt8 LEDGreen_2;              // 1 byte
+    UInt8 LEDBlue_2;               // 1 byte
+
+    UInt8 LEDRed_3;                // 1 byte
+    UInt8 LEDGreen_3;              // 1 byte
+    UInt8 LEDBlue_3;               // 1 byte
+    UInt8 LEDRed_4;                // 1 byte
+
+    UInt8 LEDGreen_4;              // 1 byte
+    UInt8 LEDBlue_4;                // 1 byte
+    UInt8 additional;              // 1 byte
+} I2CActuatorState;
+
+
+typedef struct {
+  SInt16 Proximity[8];
+  SInt16 Micro[4];
+  UInt8  Selector;
+  SInt16 StepsL;
+  SInt16 StepsR;
+  UInt8  TVRemote;
+} I2CSensorState;
+
+//Left speed (2) Right speed (2)	Speaker (1)	LED1, LED3, LED5, LED7 (1)	LED2 RGB (3)	LED4 RGB (3)	LED6 RGB (3)	LED8 RGB (3)	Additional (1)
+
+/*typedef struct {
+    SInt16 LWheel;               // 2 bytes
+    SInt16 RWheel;               // 2 bytes
+    UInt8 Speaker;		 // 1 byte
+//    UInt16 RBMessageData;        // 2 bytes
+    UInt8 BaseLEDs;                // 1 byte
+    UInt8 LEDRed_1;                // 1 byte
+    UInt8 LEDGreen_1;              // 1 byte
+    UInt8 LEDBlue_1;               // 1 byte
+    UInt8 LEDRed_2;                // 1 byte
+    UInt8 LEDGreen_2;              // 1 byte
+    UInt8 LEDBlue_2;               // 1 byte
+    UInt8 LEDRed_3;                // 1 byte
+    UInt8 LEDGreen_3;              // 1 byte
+    UInt8 LEDBlue_3;               // 1 byte
+    UInt8 LEDRed_4;                // 1 byte
+    UInt8 LEDGreen_4;              // 1 byte
+    UInt8 LEDBlue4;                // 1 byte
+    UInt8 additional; 		   // 1 byte
+    //UInt8 IRComEnabled;          // 1 byte
+    //UInt8 IRComMessageData;      // 1 byte
+    //UInt8 Reset;                 // 1 byte
+    //UInt8 padding;               // PADDING 1 byte
+} BaseActuatorState;
+*/
 
 #ifdef __cplusplus
 bool isset(char un_byte, size_t un_pos);
 std::ostream& operator<<(std::ostream& t_os, const BaseSensorState& s_state);
+std::ostream& operator<<(std::ostream& t_os, const I2CSensorState& s_state);
 std::ostream& operator<<(std::ostream& t_os, const BaseActuatorState& s_state);
+std::ostream& operator<<(std::ostream& t_os, const I2CActuatorState& s_state);
 #endif
 
 #ifdef __cplusplus

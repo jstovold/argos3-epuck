@@ -22,7 +22,7 @@ namespace argos {
 
    void CRealEPuckBaseLEDsActuator::SwitchLED(size_t un_led_number,
                                               bool b_switched_on) {
-       un_led_number = (8 - un_led_number)%8;
+      un_led_number = (3 - un_led_number)%8;
       if(b_switched_on) {
          m_psState->BaseLEDs |= (1 << un_led_number);
       } else {

@@ -153,6 +153,100 @@ void CRealEPuckI2CDevice::WriteRegister(TI2CDeviceStream t_stream,
 
 }
 
+void CRealEPuckI2CDevice::convertActuatorState(BaseActuatorState* baseState, I2CActuatorState* i2c_state) {
+
+//  I2CActuatorState state;
+//  I2CActuatorState* returnState = &state;
+
+  i2c_state->LWheel     = baseState->LWheel;
+  i2c_state->RWheel     = baseState->RWheel;
+  i2c_state->Speaker    = 0xFF;
+  i2c_state->BaseLEDs   = baseState->BaseLEDs;
+
+  i2c_state->LEDRed_1   = baseState->LEDRed_1;
+  i2c_state->LEDGreen_1 = baseState->LEDGreen_1;
+  i2c_state->LEDBlue_1  = baseState->LEDBlue_1;
+
+  i2c_state->LEDRed_2   = baseState->LEDRed_2;
+  i2c_state->LEDGreen_2 = baseState->LEDGreen_2;
+  i2c_state->LEDBlue_2  = baseState->LEDBlue_2;
+
+  i2c_state->LEDRed_3   = baseState->LEDRed_3;
+  i2c_state->LEDGreen_3 = baseState->LEDGreen_3;
+  i2c_state->LEDBlue_3  = baseState->LEDBlue_3;
+
+  i2c_state->LEDRed_4   = baseState->LEDRed_4;
+  i2c_state->LEDGreen_4 = baseState->LEDGreen_4;
+  i2c_state->LEDBlue_4  = baseState->LEDBlue_4;
+
+  i2c_state->additional = 0x00;
+
+ // return state;
+}
+
+
+/*void CRealEPuckI2CDevice::unpackStruct_actuator(I2CActuatorState* i2c_state, UInt8 output_arr[]) {
+
+  int i = 0;
+  output_arr[i++] =  0x00; ///i2c_state->LWheel >> 8;
+  output_arr[i++] =  0x00; //i2c_state->LWheel & 0x00FF;
+
+  output_arr[i++] =  0x00; //i2c_state->RWheel >> 8;
+  output_arr[i++] =  0x00; //i2c_state->RWheel & 0x00FF;
+
+  output_arr[i++] =  i2c_state->Speaker;
+  output_arr[i++] =  i2c_state->BaseLEDs;
+
+  output_arr[i++] =  i2c_state->LEDRed_1;
+  output_arr[i++] =  i2c_state->LEDGreen_1;
+  output_arr[i++] =  i2c_state->LEDBlue_1;
+
+  output_arr[i++] =  i2c_state->LEDGreen_2;
+  output_arr[i++] =  i2c_state->LEDRed_2;
+  output_arr[i++] =  i2c_state->LEDBlue_2;
+
+  output_arr[i++] =  i2c_state->LEDGreen_3;
+  output_arr[i++] =  i2c_state->LEDRed_3;
+  output_arr[i++] =  i2c_state->LEDBlue_3;
+
+  output_arr[i++] =  i2c_state->LEDGreen_4;
+  output_arr[i++] =  i2c_state->LEDRed_4;
+  output_arr[i++] =  i2c_state->LEDBlue_4;
+
+  output_arr[i++] =  i2c_state->additional;
+
+}
+*/
+
+void CRealEPuckI2CDevice::convertSensorState(I2CSensorState* i2c_state, BaseSensorState* base_state) {
+
+//  BaseSensorState state;
+//  BaseSensorState* baseState = &state;
+
+  for (int i = 0; i < 8; i++) {
+    base_state->Proximity[i] = i2c_state->Proximity[i];
+    base_state->Light[i] = 0x0000;
+//    base_state->IRComMessage[i] = 0x00;
+//    base_state->RBMessage[i] = 0x00;
+  }
+
+  for (int i = 0; i < 4; i++) {
+    base_state->Micro[i] = i2c_state->Micro[i];
+  }
+
+  base_state->Accel[0] = 0x0000;
+  base_state->Accel[1] = 0x0000;
+  base_state->Accel[2] = 0x0000;
+
+//  base_state->RBhasReceived = 0x0000;
+  base_state->Battery_LOW = 0x0000;
+  //return state;
+}
+
+
+
+
+
 /****************************************/
 /****************************************/
 
@@ -166,6 +260,9 @@ void CRealEPuckI2CDevice::WriteData(TI2CDeviceStream t_stream,
     ssize_t nWritten = 0;
     UInt32 unRetries = 0;
     size_t unLeftToWrite = n_count;
+
+  // LOG << "[JHS-2] to write: " << unLeftToWrite << std::endl;
+
     SInt8* pnCurrentPos = (SInt8*) n_buffer;
     do {
         nWritten = ::write(t_stream, pnCurrentPos, unLeftToWrite);
@@ -182,6 +279,8 @@ void CRealEPuckI2CDevice::WriteData(TI2CDeviceStream t_stream,
             unLeftToWrite -= nWritten;
             pnCurrentPos += nWritten;
         }
+//        LOG << "[JHS-2] written: " << nWritten << std::endl;
+
     } while (unLeftToWrite != 0);
 
     pthread_mutex_unlock(&m_tIOMutex);
