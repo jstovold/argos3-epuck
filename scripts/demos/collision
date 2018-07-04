@@ -1,0 +1,4 @@
+export LD_LIBRARY_PATH=/home/root/ARGoS/lib
+cd /home/root/demos/robotlab/
+./collision -c collision.argos -i demo_collision 
+

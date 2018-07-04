@@ -1,0 +1,47 @@
+<?xml version="1.0" ?>
+<argos-configuration>
+
+    <framework>
+        <experiment length="5000"
+                    ticks_per_second="8"/>
+    </framework>
+
+    <controllers>
+        <demo_collision_controller id="demo_collision"
+                         library="build_sim/testing/demos/libcollision.so">
+
+            <sensors>
+		<epuck_proximity implementation="default"/>
+		<epuck_light implementation="default"/>
+            </sensors>
+
+            <actuators>
+                <epuck_wheels implementation="default"/>
+                <epuck_base_leds implementation="default" medium="leds"/>
+                <epuck_rgb_leds implementation="default" medium="leds"/>
+            </actuators>
+
+            <params/>
+        </demo_collision_controller>
+    </controllers>
+
+    <arena size="5,5,1" center="0,0,0.5">
+        <e-puck id="ep0">
+            <body position="0,0,0" orientation="0,0,0"/>
+            <controller config="demo_collision" />
+        </e-puck>
+    </arena>
+
+    <physics_engines>
+        <dynamics2d id="dyn2d" />
+    </physics_engines>
+
+    <media>
+        <led id="leds"/>
+    </media>
+
+    <visualization>
+        <qt-opengl/>
+    </visualization>
+
+</argos-configuration>

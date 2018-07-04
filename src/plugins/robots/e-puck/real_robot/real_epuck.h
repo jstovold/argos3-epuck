@@ -32,6 +32,9 @@ namespace argos {
 #include <argos3/plugins/robots/e-puck/real_robot/real_epuck_omnidirectional_camera_sensor.h>
 #include <argos3/plugins/robots/e-puck/real_robot/real_epuck_virtual_camrab_sensor.h>   //@antoine
 #include <argos3/plugins/robots/e-puck/real_robot/real_epuck_virtual_camrab_actuator.h>   //@antoine
+#include <argos3/plugins/robots/e-puck/real_robot/real_epuck_camera_sensor.h>
+#include <argos3/plugins/robots/e-puck/real_robot/real_epuck_camera_actuator.h>
+
 #include <argos3/core/control_interface/ci_controller.h>
 #include <argos3/core/utility/datatypes/datatypes.h>
 #include <argos3/core/utility/logging/argos_log.h>
@@ -376,7 +379,7 @@ namespace argos {
          } while (unLeftToRead != 0);
       }
 
-      template<typename T> void SendDataToPic_i2c(T& t_data) {
+      template<typename T> void SendDataToPic_i2c(T& t_data, int overrideWriteLength) {
          /* the size of the data send to the pic */
          //ssize_t nWritten;
          /* the size of the data to write */
@@ -387,7 +390,7 @@ namespace argos {
 //  	   LOG << "[JHS] to write: " << sizeof(T) << std::endl;
             CRealEPuckI2CDevice::WriteData(m_ni2cPortFileDescriptor,
 		                           (SInt8*)&t_data,
-                   			   sizeof(T) - 1);
+                   			   overrideWriteLength);
 
             //if (nWritten < 0) {
             //   THROW_ARGOSEXCEPTION("Error writing data to the i2c");
@@ -414,9 +417,18 @@ namespace argos {
          /* the size of the data left to read */
          size_t unLeftToRead = overrideReadLength;
          /* current position in the data */
-//	 LOG << "[JHS] to read: " << unLeftToRead << std::endl;
 
          UInt8* pnCurrentPos = (UInt8*) &t_data;
+
+//	 nRead = ::read(m_ni2cPortFileDescriptor,
+//			pnCurrentPos,
+//			1);
+//	 LOG << "[JHS] currentPos: " << *pnCurrentPos << std::endl;
+
+ //	 unLeftToRead = (*pnCurrentPos) - 1;
+//	 pnCurrentPos++;
+//	 LOG << "[JHS] to read: " << unLeftToRead << std::endl;
+
          do {
             /* try to read the content of data to the pic */
             nRead = ::read(m_ni2cPortFileDescriptor,
@@ -424,13 +436,15 @@ namespace argos {
                            unLeftToRead);
             /* if there was an error during reading */
             if (nRead < 0) {
-               THROW_ARGOSEXCEPTION("Error reading data from the pic");
+		//THROW_ARGOSEXCEPTION("Error reading data from the pic");
+		LOGERR << "Error reading data from the pic" << std::endl;
+		break;
             } else {
                unLeftToRead -= nRead;
                pnCurrentPos += nRead;
             }
   //	    LOG << "[JHS] read from i2c: " << nRead << std::endl;
-         } while (unLeftToRead != 0);
+         } while (unLeftToRead > 0);
 
       }
 

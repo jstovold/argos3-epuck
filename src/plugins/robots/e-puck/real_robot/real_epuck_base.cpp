@@ -101,7 +101,15 @@ namespace argos {
 	     << s_state.StepsL << " R:"
 	     << s_state.StepsR
 	     << "}, TVRemote={"
-	     << s_state.TVRemote << "} ]";
+	     << s_state.TVRemote << "}, Light={"
+             << s_state.Light[0] << " "
+             << s_state.Light[1] << " "
+             << s_state.Light[2] << " "
+             << s_state.Light[3] << " "
+             << s_state.Light[4] << " "
+             << s_state.Light[5] << " "
+             << s_state.Light[6] << " "
+             << s_state.Light[7] << "}";
 
         t_os << "" << std::endl;
         return t_os;

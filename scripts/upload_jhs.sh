@@ -82,22 +82,34 @@ function update_plugin() {
     upload_file $ROBOT $ARGOS_PLUGIN_PATH/libargos3plugin_epuck_epuck.so $ROBOT_ARGOS_HOME/lib/
 }
 
+function update_demo() {
+    ROBOT=$1
+    ssh $ROBOT_SSH_USER@$ROBOT_BASE_IP.$ROBOT 'mkdir -p /home/root/demos/robotlab/'
+    upload_file $ROBOT ../epuck_build/testing/demos/$2 /home/root/demos/robotlab/$2
+    upload_file $ROBOT ../src/testing/demos/$2.argos /home/root/demos/robotlab/$2.argos
+    upload_file $ROBOT ./demos/$2 /home/root/$2
+}
+
+
 #
 # Uploads the ssh key onto the robot
 #
 # $1: the id of the e-puck
 function upload_key() {
     ROBOT=$1
-    ssh $ROBOT_SSH_USER@$ROBOT_BASE_IP.$ROBOT 'mkdir -p .ssh'
-    if [ -e ~/.ssh/id_rsa.pub ]; then
-        cat ~/.ssh/id_rsa.pub | ssh $ROBOT_SSH_USER@$ROBOT_BASE_IP.$ROBOT 'cat >> .ssh/authorized_keys'
-    elif [ -e ~/.ssh/id_dsa.pub ]; then
-        cat ~/.ssh/id_dsa.pub | ssh $ROBOT_SSH_USER@$ROBOT_BASE_IP.$ROBOT 'cat >> .ssh/authorized_keys'
-    else
-        echo "ERROR: you don't have an ssh public key. Create it with the command ssh-keygen."
-        echo
-        exit 1
-    fi
+    scp ssh/sshd_config $ROBOT_SSH_USER@$ROBOT_BASE_IP.$ROBOT:/home/root/sshd_config
+    ssh $ROBOT_SSH_USER@$ROBOT_BASE_IP.$ROBOT 'mv /home/root/sshd_config /etc/ssh/sshd_config'
+    ssh-copy-id $ROBOT_SSH_USER@$ROBOT_BASE_IP.$ROBOT
+#    ssh $ROBOT_SSH_USER@$ROBOT_BASE_IP.$ROBOT 'mkdir -p .ssh'
+ #   if [ -e ~/.ssh/id_rsa.pub ]; then
+  #      cat ~/.ssh/id_rsa.pub | ssh $ROBOT_SSH_USER@$ROBOT_BASE_IP.$ROBOT 'cat >> .ssh/authorized_keys'
+   # elif [ -e ~/.ssh/id_dsa.pub ]; then
+    #    cat ~/.ssh/id_dsa.pub | ssh $ROBOT_SSH_USER@$ROBOT_BASE_IP.$ROBOT 'cat >> .ssh/authorized_keys'
+  #  else
+   #     echo "ERROR: you don't have an ssh public key. Create it with the command ssh-keygen."
+    #    echo
+    #    exit 1
+    #fi
     echo "Key added. You now can login without typing your password."
     echo
 }
@@ -128,6 +140,14 @@ case $OPERATION in
         update_core $ROBOT
         update_plugin $ROBOT
         ;;
+    demo)
+        if [ $# -ne 2 ]; then
+            echo "ERROR: Wrong number of arguments passed to operation 'demo'"
+            echo
+            print_syntax
+        fi
+	update_demo $2 $1
+	;;
     file)
         if [ $# -ne 3 ]; then
             echo "ERROR: Wrong number of arguments passed to operation 'file'"

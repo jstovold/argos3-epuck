@@ -179,56 +179,28 @@ void CRealEPuckI2CDevice::convertActuatorState(BaseActuatorState* baseState, I2C
   i2c_state->LEDGreen_4 = baseState->LEDGreen_4;
   i2c_state->LEDBlue_4  = baseState->LEDBlue_4;
 
-  i2c_state->additional = 0x00;
+  i2c_state->additional = 0x00;  //baseState->RequestImage;
+
+  i2c_state->IRComEnabled = baseState->IRComEnabled;
+  i2c_state->IRComMessageData = baseState->IRComMessageData;
 
  // return state;
 }
 
 
-/*void CRealEPuckI2CDevice::unpackStruct_actuator(I2CActuatorState* i2c_state, UInt8 output_arr[]) {
-
-  int i = 0;
-  output_arr[i++] =  0x00; ///i2c_state->LWheel >> 8;
-  output_arr[i++] =  0x00; //i2c_state->LWheel & 0x00FF;
-
-  output_arr[i++] =  0x00; //i2c_state->RWheel >> 8;
-  output_arr[i++] =  0x00; //i2c_state->RWheel & 0x00FF;
-
-  output_arr[i++] =  i2c_state->Speaker;
-  output_arr[i++] =  i2c_state->BaseLEDs;
-
-  output_arr[i++] =  i2c_state->LEDRed_1;
-  output_arr[i++] =  i2c_state->LEDGreen_1;
-  output_arr[i++] =  i2c_state->LEDBlue_1;
-
-  output_arr[i++] =  i2c_state->LEDGreen_2;
-  output_arr[i++] =  i2c_state->LEDRed_2;
-  output_arr[i++] =  i2c_state->LEDBlue_2;
-
-  output_arr[i++] =  i2c_state->LEDGreen_3;
-  output_arr[i++] =  i2c_state->LEDRed_3;
-  output_arr[i++] =  i2c_state->LEDBlue_3;
-
-  output_arr[i++] =  i2c_state->LEDGreen_4;
-  output_arr[i++] =  i2c_state->LEDRed_4;
-  output_arr[i++] =  i2c_state->LEDBlue_4;
-
-  output_arr[i++] =  i2c_state->additional;
-
-}
-*/
-
 void CRealEPuckI2CDevice::convertSensorState(I2CSensorState* i2c_state, BaseSensorState* base_state) {
 
 //  BaseSensorState state;
 //  BaseSensorState* baseState = &state;
+//    LOG << "[JHS-5] in convertSensorState" << std::endl;
 
   for (int i = 0; i < 8; i++) {
     base_state->Proximity[i] = i2c_state->Proximity[i];
-    base_state->Light[i] = 0x0000;
-//    base_state->IRComMessage[i] = 0x00;
+    base_state->Light[i] = i2c_state->Light[i];
 //    base_state->RBMessage[i] = 0x00;
   }
+  
+  base_state->IRComMessage = i2c_state->IRComMessage;
 
   for (int i = 0; i < 4; i++) {
     base_state->Micro[i] = i2c_state->Micro[i];
@@ -237,9 +209,17 @@ void CRealEPuckI2CDevice::convertSensorState(I2CSensorState* i2c_state, BaseSens
   base_state->Accel[0] = 0x0000;
   base_state->Accel[1] = 0x0000;
   base_state->Accel[2] = 0x0000;
+  base_state->IRComHasReceived = i2c_state->IRComHasReceived;
 
 //  base_state->RBhasReceived = 0x0000;
   base_state->Battery_LOW = 0x0000;
+
+//  if (i2c_state->ImageReceived == 0x01) {
+  //  LOG << "[JHS-5] image received" << std::endl;
+    //memcpy(base_state->image, i2c_state->image, 4800);
+  //} else {
+   // LOG << "[JHS-5] no image received" << std::endl;
+ // }
   //return state;
 }
 
@@ -261,7 +241,7 @@ void CRealEPuckI2CDevice::WriteData(TI2CDeviceStream t_stream,
     UInt32 unRetries = 0;
     size_t unLeftToWrite = n_count;
 
-  // LOG << "[JHS-2] to write: " << unLeftToWrite << std::endl;
+//   LOG << "[JHS-2] to write: " << unLeftToWrite << std::endl;
 
     SInt8* pnCurrentPos = (SInt8*) n_buffer;
     do {
@@ -273,6 +253,7 @@ void CRealEPuckI2CDevice::WriteData(TI2CDeviceStream t_stream,
             LOGERR << "CRealEPuckI2CDevice::WriteData(): "
                    << "Unable to send data to the I2C device stream: "
                    << ::strerror(errno);
+	    break;
         } else if (nWritten < 0){
             ++unRetries;
         } else {

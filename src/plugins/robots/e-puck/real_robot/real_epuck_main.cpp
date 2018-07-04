@@ -102,10 +102,10 @@ int main(int argc, char** argv) {
      */
 
     try {
-	LOG << "[JHS] entering main loop " << std::endl;
+//	LOG << "[JHS] entering main loop " << std::endl;
         /* be sure to be sync on the ticks before begining the steps */
         pcRealEPuck->SyncControlStep();
-	LOG << "[JHS] control steps synced " << std::endl;
+//	LOG << "[JHS] control steps synced " << std::endl;
            pcRealEPuck->SendActuatorData();
 
         while (!pcRealEPuck->IsExperimentFinished() && !pcRealEPuck->bGoHome()) {
@@ -113,9 +113,10 @@ int main(int argc, char** argv) {
            /* Receive raw data from robot sensors */
            pcRealEPuck->ReceiveSensorData();
 //	   LOG << "[JHS] sensor data received " << std::endl;
-           /* Perform sensor data post-processing */
+	   /* Perform sensor data post-processing */
            pcRealEPuck->UpdateValues();
 //	   LOG << "[JHS] values updated " << std::endl;
+  //         LOG.Flush();
            /* Execute control step only if we can at this time */
            pcRealEPuck->GetController().ControlStep();
 //	   LOG << "[JHS] step " << std::endl;

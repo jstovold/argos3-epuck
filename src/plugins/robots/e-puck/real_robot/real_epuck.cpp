@@ -21,11 +21,13 @@
 #include <unistd.h>
 
 namespace argos {
+#define IMAGE_SIZE 4800
+#define SENSOR_SIZE 57
+#define ACTUATOR_SIZE 21
 
 const std::string DEVICE = "/dev/ttyS0";
 const speed_t BAUD_RATE = B115200;
 const SInt16 I2C_DEVICE = 0x1F;
-
 /****************************************/
 /****************************************/
 
@@ -199,21 +201,25 @@ void CRealEPuck::SendActuatorData() {
     case SENDING_CONFIGURATION:
     case RECEIVE:
     {
+//	LOG << "[JHS] in sendactuatordata" << std::endl;
+
         /* Send data to the I2C bus */
         for(size_t i = 0; i < m_vecI2CActuators.size(); ++i) {
             m_vecI2CActuators[i]->SendData();
         }
         /* Send data to the serial bus */
-
-	I2CActuatorState convertedActuatorState; 
+//	LOG << "[JHS] converting states" << std::endl;
+	I2CActuatorState convertedActuatorState;
 	CRealEPuckI2CDevice::convertActuatorState(&m_sActuatorState, &convertedActuatorState);
 	//UInt8 unpackedState[19] = {};
 //	CRealEPuckI2CDevice::unpackStruct_actuator(&convertedActuatorState, unpackedState);
-
+//	LOG << "[JHS] converted actuator" << std::endl;
 //	LOG << "[JHS] " << convertedActuatorState << std::endl;
 
-        SendDataToPic_i2c<I2CActuatorState>(convertedActuatorState);
+        SendDataToPic_i2c<I2CActuatorState>(convertedActuatorState, ACTUATOR_SIZE);
+//	LOG << "[JHS] sent data" << std::endl;
         //SendDataToPic_i2c(unpackedState, 19);
+	m_sActuatorState.RequestImage = 0x00; // make sure we don't send it twice
 
         /* Set new state */
         m_eBoardState = SEND;
@@ -255,13 +261,15 @@ void CRealEPuck::ReceiveSensorData() {
 
         I2CSensorState receivedData;
 
-        ReceiveDataFromPic_i2c<I2CSensorState>(receivedData, 30);
+/// 	LOG << "[JHS-2] starting data receive: " << sizeof(receivedData) << std::endl;
+//	LOG.Flush();
+        ReceiveDataFromPic_i2c<I2CSensorState>(receivedData, SENSOR_SIZE);
  //	LOG << "[JHS-2] data received: " << sizeof(receivedData) << std::endl;
    //     LOG << "[JHS] : \t" << receivedData << std::endl;
 
 
 	CRealEPuckI2CDevice::convertSensorState(&receivedData, &m_sSensorState);
- //	LOG << "[JHS-2] data converted " << std::endl;
+// 	LOG << "[JHS-2] data converted " << std::endl;
 
         m_eBoardState = RECEIVE;
         break;
@@ -273,13 +281,19 @@ void CRealEPuck::ReceiveSensorData() {
 /****************************************/
 
 void CRealEPuck::UpdateValues() {
+//	LOG << "[JHS-3] in updatevalues" << std::endl;
     /*Update camera*/
     if(m_pcOmnidirectionalCameraSensor!=NULL){
         m_pcOmnidirectionalCameraSensor->Update();
     }
+//	LOG << "[JHS-3] after omni" << std::endl;
     for(size_t i = 0; i < m_vecSerialSensors.size(); ++i) {
+//	LOG << "[JHS-3] updating: " << i << std::endl;
+
         m_vecSerialSensors[i]->UpdateValues();
+//	LOG << "[JHS-3] updated: " << i << std::endl;
     }
+  //  LOG << "[JHS-3] leaving updatevalues" << std::endl;
 }
 
 /****************************************/
@@ -304,6 +318,10 @@ CCI_Actuator* CRealEPuck::InsertActuator(const std::string& str_actuator_name) {
         pcRGBLEDsActuator->SetState(m_sActuatorState);
 	//m_vecI2CActuators.push_back(pcRGBLEDsActuator);
         return pcRGBLEDsActuator;
+    } else if (str_actuator_name == "epuck_camera") {
+	CRealEPuckCameraActuator* pcCameraActuator = CreateActuator<CRealEPuckCameraActuator>(str_actuator_name);
+	pcCameraActuator->SetState(m_sActuatorState);
+	return pcCameraActuator;
     } else if (str_actuator_name == "epuck_range_and_bearing") {
         CRealEPuckRangeAndBearingActuator* pcRABActuator = CreateActuator<CRealEPuckRangeAndBearingActuator>(str_actuator_name);
         m_vecI2CActuators.push_back(pcRABActuator);
@@ -362,6 +380,12 @@ CCI_Sensor* CRealEPuck::InsertSensor(const std::string& str_sensor_name) {
         pcMicroSensor->SetState(m_sSensorState);
         m_vecSerialSensors.push_back(pcMicroSensor);
         return pcMicroSensor;
+    } else if (str_sensor_name == "epuck_camera") {
+        CRealEPuckCameraSensor* pcCameraSensor = CreateSensor<CRealEPuckCameraSensor>(str_sensor_name);
+	m_vecI2CSensors.push_back(pcCameraSensor);
+//	pcCameraSensor->SetState(m_sSensorState);
+//	m_vecSerialSensors.push_back(pcCameraSensor);
+	return pcCameraSensor;
     } else if (str_sensor_name == "epuck_omnidirectional_camera") {
         m_pcOmnidirectionalCameraSensor = CreateSensor<CRealEPuckOmnidirectionalCameraSensor>(str_sensor_name);
         return m_pcOmnidirectionalCameraSensor;    

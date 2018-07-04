@@ -26,6 +26,8 @@ namespace argos {
 /**
     * Structure to store the sensor configuration
     */
+
+#define IMAGE_SIZE 4800
 typedef struct{
     UInt8 RBRange;   // 1 byte
     UInt8 RBEnabled; // 1 byte
@@ -65,6 +67,7 @@ typedef struct {
    UInt16 RBhasReceived;                 // 2 bytes
    UInt16 IRComHasReceived;              // 2 bytes
    BaseIRComMessage IRComMessage;        // 8 bytes
+   UInt8 image[IMAGE_SIZE];
 } BaseSensorState;
 
 /**
@@ -94,10 +97,13 @@ typedef struct {
     UInt8 LEDGreen_4;              // 1 byte
     UInt8 LEDBlue_4;                // 1 byte
 
+    UInt8 RequestImage;
+
 } BaseActuatorState;
 
 
 typedef struct {
+  //  UInt8 padding;
     SInt16 LWheel;               // 2 bytes
     SInt16 RWheel;               // 2 bytes
     UInt8 Speaker;               // 1 byte
@@ -118,6 +124,10 @@ typedef struct {
     UInt8 LEDGreen_4;              // 1 byte
     UInt8 LEDBlue_4;                // 1 byte
     UInt8 additional;              // 1 byte
+
+    UInt8 IRComEnabled;          // 1 byte
+    UInt8 IRComMessageData;      // 1 byte
+
 } I2CActuatorState;
 
 
@@ -128,6 +138,14 @@ typedef struct {
   SInt16 StepsL;
   SInt16 StepsR;
   UInt8  TVRemote;
+  SInt16 Light[8];
+
+  UInt16 IRComHasReceived;              // 2 bytes
+  BaseIRComMessage IRComMessage;        // 8 bytes
+
+  UInt8 ImageReceived;
+  UInt8 image[IMAGE_SIZE];
+
 } I2CSensorState;
 
 //Left speed (2) Right speed (2)	Speaker (1)	LED1, LED3, LED5, LED7 (1)	LED2 RGB (3)	LED4 RGB (3)	LED6 RGB (3)	LED8 RGB (3)	Additional (1)
