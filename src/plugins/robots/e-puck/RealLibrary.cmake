@@ -9,6 +9,8 @@ set(ARGOS3_HEADERS_PLUGINS_ROBOTS_EPUCK_REALROBOT
   real_robot/real_epuck_i2c_device.h
   real_robot/real_epuck_i2c_sensor.h
   real_robot/real_epuck_i2c_actuator.h
+  # I2C HAL
+#  real_robot/real_epuck_i2c_layer_actuator.h
   # Sensors
   real_robot/real_epuck_serial_sensor.h
   real_robot/real_epuck_proximity_sensor.h
@@ -21,6 +23,11 @@ set(ARGOS3_HEADERS_PLUGINS_ROBOTS_EPUCK_REALROBOT
   real_robot/real_epuck_micro_sensor.h
   real_robot/real_epuck_omnidirectional_camera_sensor.h
   real_robot/real_epuck_virtual_camrab_sensor.h
+  real_robot/real_epuck_camera_sensor.h
+  real_robot/real_epuck_wifi_transceiver.h
+  real_robot/real_epuck_wifi_sensor.h
+  real_robot/real_epuck_wifi_actuator.h
+
   # Actuators
   real_robot/real_epuck_serial_actuator.h
   real_robot/real_epuck_wheels_actuator.h
@@ -28,7 +35,8 @@ set(ARGOS3_HEADERS_PLUGINS_ROBOTS_EPUCK_REALROBOT
   real_robot/real_epuck_rgb_leds_actuator.h
   real_robot/real_epuck_range_and_bearing_actuator.h
   real_robot/real_epuck_ircom_actuator.h
-  real_robot/real_epuck_virtual_camrab_actuator.h)
+  real_robot/real_epuck_virtual_camrab_actuator.h
+  real_robot/real_epuck_camera_actuator.h)
 # Install location
 install(
   FILES ${ARGOS3_HEADERS_PLUGINS_ROBOTS_EPUCK_REALROBOT}
@@ -58,6 +66,8 @@ set(ARGOS3_SOURCES_PLUGINS_ROBOTS_EPUCK
   real_robot/real_epuck_main.cpp
   real_robot/real_epuck_base.cpp
   real_robot/real_epuck_i2c_device.cpp
+  # I2C HAL 
+#  real_robot/real_epuck_i2c_layer_actuator.cpp
   # Sensors
   real_robot/real_epuck_proximity_sensor.cpp
   real_robot/real_epuck_battery_sensor.cpp
@@ -69,6 +79,11 @@ set(ARGOS3_SOURCES_PLUGINS_ROBOTS_EPUCK
   real_robot/real_epuck_micro_sensor.cpp
   real_robot/real_epuck_omnidirectional_camera_sensor.cpp
   real_robot/real_epuck_virtual_camrab_sensor.cpp
+  real_robot/real_epuck_camera_sensor.cpp
+  real_robot/real_epuck_wifi_transceiver.cpp
+  real_robot/real_epuck_wifi_sensor.cpp
+  real_robot/real_epuck_wifi_actuator.cpp
+
   # Actuators
   real_robot/real_epuck_wheels_actuator.cpp
   real_robot/real_epuck_base_leds_actuator.cpp
@@ -76,6 +91,7 @@ set(ARGOS3_SOURCES_PLUGINS_ROBOTS_EPUCK
   real_robot/real_epuck_range_and_bearing_actuator.cpp
   real_robot/real_epuck_ircom_actuator.cpp
   real_robot/real_epuck_virtual_camrab_actuator.cpp
+  real_robot/real_epuck_camera_actuator.cpp
   # Vision
   real_robot/vision/blob_detector.cpp
   real_robot/vision/epuck_image_grabber.cpp

@@ -54,20 +54,27 @@ typedef struct {
     Real Bearing; // 4 bytes
 } BaseIRComMessage;
 
+typedef struct {
+ UInt8 data;
+ UInt8 source;
+} BaseWifiMessage;
+
+
 /**
     * Structure to store the sensors datas
     */
 typedef struct {
    BaseRangeAndBearingMessage RBMessage; // 8 bytes
    SInt16 Proximity[8];                  // 8 x 2 bytes = 16 bytes
-   UInt16  Battery_LOW;                   // 2 byte battery low
+   UInt16 Battery_LOW;                   // 2 byte battery low
    SInt16 Accel[3];                      // (3 accelerator sensor readings) x 2 bytes = 8 bytes
    SInt16 Micro[4];                      // (3 micro-volume sensor readings + 1 of PADDING) x 2 bytes = 8 bytes
    SInt16 Light[8];                      // 8 x 2 bytes = 16 bytes
    UInt16 RBhasReceived;                 // 2 bytes
    UInt16 IRComHasReceived;              // 2 bytes
    BaseIRComMessage IRComMessage;        // 8 bytes
-   UInt8 image[IMAGE_SIZE];
+   UInt8  WifiHasReceived;
+   BaseWifiMessage WifiMessage;
 } BaseSensorState;
 
 /**
@@ -98,7 +105,8 @@ typedef struct {
     UInt8 LEDBlue_4;                // 1 byte
 
     UInt8 RequestImage;
-
+    bool WifiMessageToSend;
+    BaseWifiMessage WifiMessage;
 } BaseActuatorState;
 
 
@@ -147,6 +155,8 @@ typedef struct {
   UInt8 image[IMAGE_SIZE];
 
 } I2CSensorState;
+
+
 
 //Left speed (2) Right speed (2)	Speaker (1)	LED1, LED3, LED5, LED7 (1)	LED2 RGB (3)	LED4 RGB (3)	LED6 RGB (3)	LED8 RGB (3)	Additional (1)
 

@@ -8,6 +8,9 @@ if(ARGOS_BUILD_FOR_SIMULATOR)
   add_library(collision MODULE collision.h collision.cpp)
   target_link_libraries(collision argos3plugin_${ARGOS_BUILD_FOR}_epuck)
 
+  add_library(wifi MODULE wifi.h wifi.cpp)
+  target_link_libraries(wifi argos3plugin_${ARGOS_BUILD_FOR}_epuck)
+
 else()
   add_executable(dance
     dance.h
@@ -27,5 +30,11 @@ else()
     collision.cpp
     ../../plugins/robots/e-puck/real_robot/real_epuck_main.cpp)
   target_link_libraries(collision argos3plugin_${ARGOS_BUILD_FOR}_epuck)
+
+  add_executable(wifi
+    wifi.h
+    wifi.cpp
+    ../../plugins/robots/e-puck/real_robot/real_epuck_main.cpp)
+  target_link_libraries(wifi argos3plugin_${ARGOS_BUILD_FOR}_epuck)
 
 endif(ARGOS_BUILD_FOR_SIMULATOR)

@@ -34,6 +34,9 @@ namespace argos {
 #include <argos3/plugins/robots/e-puck/real_robot/real_epuck_virtual_camrab_actuator.h>   //@antoine
 #include <argos3/plugins/robots/e-puck/real_robot/real_epuck_camera_sensor.h>
 #include <argos3/plugins/robots/e-puck/real_robot/real_epuck_camera_actuator.h>
+#include <argos3/plugins/robots/e-puck/real_robot/real_epuck_wifi_sensor.h>
+#include <argos3/plugins/robots/e-puck/real_robot/real_epuck_wifi_actuator.h>
+#include <argos3/plugins/robots/e-puck/real_robot/real_epuck_wifi_transceiver.h>
 
 #include <argos3/core/control_interface/ci_controller.h>
 #include <argos3/core/utility/datatypes/datatypes.h>
@@ -256,6 +259,8 @@ namespace argos {
        */
       void InitSerial();
 
+
+      void InitWifi();
       /**
        * Send a special character to wake up the pic
        */
@@ -401,6 +406,25 @@ namespace argos {
          //} while (unLeftToWrite != 0);
         }
 
+
+
+      void SendWifiPacket(BaseWifiMessage& message) {
+	// calls functions in the transceiver to send the message
+	m_pcWifiTransceiver->BroadcastMessage(message.data);
+      }
+
+      bool ReceiveWifiPacket(BaseWifiMessage* message) {
+	// calls functions in the transceiver to receive messages
+	if (m_pcWifiTransceiver->GotNewMessage()) {
+	  m_pcWifiTransceiver->GetLatestMessage(message);
+	  m_pcWifiTransceiver->ClearMessages();
+	  return true;
+	}
+	return false;
+      }
+
+
+
       /**
        * Receive data from the pic
        *
@@ -454,6 +478,10 @@ namespace argos {
       static void SetId(CCI_Controller& c_controller);
 
    private:
+
+      // Wifi transceiver
+      CRealEPuckWifiTransceiver* m_pcWifiTransceiver;
+
 
       /**
        * The parsed XML tree of the configuration file.
@@ -554,6 +582,9 @@ namespace argos {
        * Struct that contains the sensor state.
        */
       BaseSensorState m_sSensorState;
+
+      //WifiSensorState m_sWifiReceived;
+      //WifiActuatorState m_sWifiSend;
 
       /**
        * The random number generator

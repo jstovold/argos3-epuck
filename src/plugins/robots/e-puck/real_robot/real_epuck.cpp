@@ -126,12 +126,18 @@ void CRealEPuck::Init(const std::string& str_config_file_name,
     CRealEPuckI2CDevice::Init();
 
     InitI2C();
-
+    InitWifi();
     WakeUpPic();
     SendSensorConfiguration();
     InitController(str_config_file_name, str_controller_id);
 }
 
+
+void CRealEPuck::InitWifi() {
+
+  m_pcWifiTransceiver = new CRealEPuckWifiTransceiver();
+  m_pcWifiTransceiver->Init(m_pcWifiTransceiver);
+}
 
 void CRealEPuck::InitI2C() {
     switch (m_eBoardState){
@@ -221,6 +227,12 @@ void CRealEPuck::SendActuatorData() {
         //SendDataToPic_i2c(unpackedState, 19);
 	m_sActuatorState.RequestImage = 0x00; // make sure we don't send it twice
 
+	if (m_sActuatorState.WifiMessageToSend) {
+  	  SendWifiPacket(m_sActuatorState.WifiMessage);
+	  m_sActuatorState.WifiMessageToSend = false;
+	}
+
+
         /* Set new state */
         m_eBoardState = SEND;
         break;
@@ -270,7 +282,13 @@ void CRealEPuck::ReceiveSensorData() {
 
 	CRealEPuckI2CDevice::convertSensorState(&receivedData, &m_sSensorState);
 // 	LOG << "[JHS-2] data converted " << std::endl;
-
+	BaseWifiMessage msg;
+	bool rcvd = ReceiveWifiPacket(&msg);
+	m_sSensorState.WifiHasReceived = rcvd ? 1 : 0;
+	m_sSensorState.WifiMessage = msg;
+//	if (rcvd) {
+//	  GetLatestMessage(&(m_sSensorState->WifiMessage));
+//	}
         m_eBoardState = RECEIVE;
         break;
     }
@@ -334,6 +352,10 @@ CCI_Actuator* CRealEPuck::InsertActuator(const std::string& str_actuator_name) {
         CRealEPuckIRComActuator* pcIRComActuator = CreateActuator<CRealEPuckIRComActuator>(str_actuator_name);
         pcIRComActuator->SetState(m_sActuatorState);
         return pcIRComActuator;
+    } else if (str_actuator_name == "epuck_wifi") {
+	CRealEPuckWifiActuator* pcWifiActuator = CreateActuator<CRealEPuckWifiActuator>(str_actuator_name);
+	pcWifiActuator->SetState(m_sActuatorState);
+	return pcWifiActuator;
     } else {
         THROW_ARGOSEXCEPTION("Unknown actuator \"" << str_actuator_name << "\"");
     }
@@ -393,7 +415,12 @@ CCI_Sensor* CRealEPuck::InsertSensor(const std::string& str_sensor_name) {
         CRealEPuckVirtualCamrabSensor* pcVirtualCamrabSensor = CreateSensor<CRealEPuckVirtualCamrabSensor>(str_sensor_name);
         m_vecI2CSensors.push_back(pcVirtualCamrabSensor);
         return pcVirtualCamrabSensor;
-    }if (str_sensor_name == "epuck_battery") {
+    } else if (str_sensor_name == "epuck_wifi") {
+	CRealEPuckWifiSensor* pcWifiSensor = CreateSensor<CRealEPuckWifiSensor>(str_sensor_name);
+        pcWifiSensor->SetState(m_sSensorState);
+	m_vecSerialSensors.push_back(pcWifiSensor);
+	return pcWifiSensor;
+    } else if (str_sensor_name == "epuck_battery") {
         CRealEPuckBatterySensor* pcBatterySensor = CreateSensor<CRealEPuckBatterySensor>(str_sensor_name);
         pcBatterySensor->SetState(m_sSensorState);
         m_vecSerialSensors.push_back(pcBatterySensor);

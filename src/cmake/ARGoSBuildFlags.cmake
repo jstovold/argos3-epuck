@@ -14,7 +14,7 @@ set(CMAKE_C_FLAGS_RELEASE        "-Os -DNDEBUG")
 set(CMAKE_C_FLAGS_RELWITHDEBINFO "-Os -ggdb3 -DNDEBUG")
 set(CMAKE_C_FLAGS_DEBUG          "-ggdb3")
 
-set(CMAKE_CXX_FLAGS                "-Wall")
+set(CMAKE_CXX_FLAGS                "-Wall -lpthread")
 set(CMAKE_CXX_FLAGS_RELEASE        "-Os -DNDEBUG")
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-Os -ggdb3 -DNDEBUG")
 set(CMAKE_CXX_FLAGS_DEBUG          "-ggdb3")

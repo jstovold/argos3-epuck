@@ -102,30 +102,30 @@ int main(int argc, char** argv) {
      */
 
     try {
-//	LOG << "[JHS] entering main loop " << std::endl;
+	LOG << "[JHS] entering main loop " << std::endl;
         /* be sure to be sync on the ticks before begining the steps */
         pcRealEPuck->SyncControlStep();
-//	LOG << "[JHS] control steps synced " << std::endl;
+	LOG << "[JHS] control steps synced " << std::endl;
            pcRealEPuck->SendActuatorData();
 
         while (!pcRealEPuck->IsExperimentFinished() && !pcRealEPuck->bGoHome()) {
-//	   LOG << "[JHS] start of loop " << std::endl;
+	   LOG << "[JHS] start of loop " << std::endl;
            /* Receive raw data from robot sensors */
            pcRealEPuck->ReceiveSensorData();
-//	   LOG << "[JHS] sensor data received " << std::endl;
+	   LOG << "[JHS] sensor data received " << std::endl;
 	   /* Perform sensor data post-processing */
            pcRealEPuck->UpdateValues();
-//	   LOG << "[JHS] values updated " << std::endl;
+	   LOG << "[JHS] values updated " << std::endl;
   //         LOG.Flush();
            /* Execute control step only if we can at this time */
            pcRealEPuck->GetController().ControlStep();
-//	   LOG << "[JHS] step " << std::endl;
+	   LOG << "[JHS] step " << std::endl;
            /* Synchronize the current step on the ticks from xml config file */
            pcRealEPuck->SyncControlStep();
-//	   LOG << "[JHS] control steps synced " << std::endl;
+	   LOG << "[JHS] control steps synced " << std::endl;
            /* Send data to robot actuators */
            pcRealEPuck->SendActuatorData();
-//	   LOG << "[JHS] actuator data sent " << std::endl;
+	   LOG << "[JHS] actuator data sent " << std::endl;
            /* Flush the logs */
            LOG.Flush();
            LOGERR.Flush();

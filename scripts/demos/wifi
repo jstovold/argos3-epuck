@@ -1,0 +1,4 @@
+export LD_LIBRARY_PATH=/home/root/ARGoS/lib
+cd /home/root/demos/robotlab/
+./wifi -c wifi.argos -i demo_wifi 
+
